@@ -13,17 +13,13 @@ class GradeDetailDialog {
             borderRadius: BorderRadius.circular(16),
           ),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600, maxHeight: 700),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _header(context, s),
-                  const Divider(height: 24),
-                  Expanded(child: _content(s)),
-                ],
-              ),
+            constraints: const BoxConstraints(maxWidth: 700, maxHeight: 850),
+            child: Column(
+              children: [
+                _header(context),
+                Expanded(child: _content(s)),
+                _actionButtons(context),
+              ],
             ),
           ),
         );
@@ -32,128 +28,370 @@ class GradeDetailDialog {
   }
 
   // ================= HEADER =================
-  static Widget _header(BuildContext context, StudentGrade s) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              s.fullName,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            Text(s.rollNumber, style: TextStyle(color: Colors.grey.shade600)),
-          ],
+  static Widget _header(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
         ),
-        IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ],
+      ),
+      alignment: Alignment.centerLeft,
+      child: const Text(
+        "Chi Tiết Sinh Viên",
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
     );
   }
 
   // ================= CONTENT =================
   static Widget _content(StudentGrade s) {
     return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _scoreTile("Final", s.finalExam),
-          _scoreTile("Final Resit", s.finalResit),
-          _scoreTile("Practical", s.practical),
-
-          const SizedBox(height: 8),
-
-          _commentTile("Final Comment", s.finalComment),
-
-          const Divider(),
-
-          _scoreTile("PT1", s.pt1),
-          _commentTile("PT1 Comment", s.pt1Comment),
-
-          _scoreTile("PT2", s.pt2),
-          _commentTile("PT2 Comment", s.pt2Comment),
-
-          _scoreTile("PT3", s.pt3),
-          _commentTile("PT3 Comment", s.pt3Comment),
-
-          const Divider(),
-
-          _scoreTile("Project", s.project),
-          _commentTile("Project Comment", s.projectComment),
-
-          const Divider(),
-
-          _scoreTile("Total", s.total),
-
-          const SizedBox(height: 10),
-
-          _resultBox(s),
+          _section("Thông Tin Cá Nhân", [
+            _infoRow("Roll Number", s.rollNumber, "Full Name", s.fullName),
+            _infoRow("Email", "-", "", ""),
+          ]),
+          const SizedBox(height: 16),
+          _section("Kỳ Thi Cuối Kỳ", [
+            _twoColumnGrid([
+              _scoreRowSingle("Final Exam", s.finalExam),
+              _scoreRowSingle("Final Exam Resit", s.finalResit),
+              _singleFieldRow("Final Exam Comment", s.finalComment),
+              _singleFieldRow("Final Resit Comment", "-"),
+            ]),
+          ]),
+          const SizedBox(height: 16),
+          _section("Kỳ Thi Thực Hành", [
+            _twoColumnGrid([
+              _scoreRowSingle("Practical Exam", s.practical),
+              _singleFieldRow("Practical Exam Resit", "-"),
+              _singleFieldRow("Practical Exam Comment", "-"),
+              _singleFieldRow("Practical Exam Resit Comment", "-"),
+            ]),
+          ]),
+          const SizedBox(height: 16),
+          _section("Kiểm Tra Tiến Độ", [
+            _twoColumnGrid([
+              _scoreRow(
+                "Progress Test 1",
+                s.pt1,
+                "Progress Test 1 Comment",
+                s.pt1Comment,
+              ),
+              _scoreRow(
+                "Progress Test 2",
+                s.pt2,
+                "Progress Test 2 Comment",
+                s.pt2Comment,
+              ),
+              _scoreRow(
+                "Progress Test 3",
+                s.pt3,
+                "Progress Test 3 Comment",
+                s.pt3Comment,
+              ),
+              const SizedBox(),
+            ]),
+          ]),
+          const SizedBox(height: 16),
+          _section("Dự Án", [
+            _twoColumnGrid([
+              _scoreRow(
+                "Project",
+                s.project,
+                "Project Comment",
+                s.projectComment,
+              ),
+              const SizedBox(),
+            ]),
+          ]),
+          const SizedBox(height: 16),
+          _divider(),
+          const SizedBox(height: 16),
+          _section("Kết Quả Cuối Cùng", [
+            _twoColumnGrid([
+              _scoreRowSingle("Total", s.total),
+              _singleFieldRow("Result", s.result),
+              _singleFieldRow("Comment", s.comment),
+              const SizedBox(),
+            ]),
+          ]),
         ],
       ),
     );
   }
 
-  // ================= UI HELPERS =================
-  static Widget _scoreTile(String label, double value) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  // ================= SECTION BUILDER =================
+  static Widget _section(String title, List<Widget> children) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 8),
+        ...children,
+      ],
+    );
+  }
+
+  static Widget _infoRow(
+    String label1,
+    String value1,
+    String label2,
+    String value2,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
         children: [
-          Text(label),
-          Text(
-            value.toStringAsFixed(2),
-            style: const TextStyle(fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label1,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      value1,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label2,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      value2,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  static Widget _commentTile(String label, String value) {
-    if (value.isEmpty) return const SizedBox();
+  static Widget _scoreRow(
+    String scoreLabel,
+    double scoreValue,
+    String commentLabel,
+    String commentValue,
+  ) {
+    final hasComment = commentLabel.isNotEmpty && commentValue.isNotEmpty;
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
+    if (hasComment) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        scoreLabel,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        scoreValue == 0 ? "-" : scoreValue.toStringAsFixed(1),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        commentLabel,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        commentValue.isEmpty ? "-" : commentValue,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    } else {
+      // If no comment label, just show the score
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              scoreLabel,
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              scoreValue == 0 ? "-" : scoreValue.toStringAsFixed(1),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  static Widget _scoreRowSingle(String scoreLabel, double scoreValue) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: Text(label)),
-          Expanded(child: Text(value, textAlign: TextAlign.right)),
+          Text(
+            scoreLabel,
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            scoreValue == 0 ? "-" : scoreValue.toStringAsFixed(1),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );
   }
 
-  static Widget _resultBox(StudentGrade s) {
-    final isPass = s.isPass;
+  static Widget _singleFieldRow(String label, String value) {
+    if (value.isEmpty) return const SizedBox();
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
+    );
+  }
 
+  static Widget _twoColumnGrid(List<Widget> children) {
+    return Column(
+      children: [
+        for (int i = 0; i < children.length; i += 2)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Row(
+              children: [
+                Expanded(child: children[i]),
+                if (i + 1 < children.length) ...[
+                  const SizedBox(width: 16),
+                  Expanded(child: children[i + 1]),
+                ],
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  static Widget _divider() {
+    return Container(height: 1, color: Colors.grey.shade300);
+  }
+
+  static String _formatResult(String result) {
+    return result.isNotEmpty ? result : "-";
+  }
+
+  // ================= ACTION BUTTONS =================
+  static Widget _actionButtons(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isPass ? const Color(0xFFE8F5E9) : const Color(0xFFFFEBEE),
-        borderRadius: BorderRadius.circular(10),
+        border: Border(top: BorderSide(color: Colors.grey.shade200)),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          const Text("Result", style: TextStyle(fontWeight: FontWeight.bold)),
-          Text(
-            s.result,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: isPass ? Colors.green : Colors.red,
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              "Đóng",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

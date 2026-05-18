@@ -33,79 +33,16 @@ class _GradeTableCardState extends State<GradeTableCard> {
     return value.toStringAsFixed(2);
   }
 
-  void _showDetailDialog(BuildContext context, StudentGrade s) {
-    showDialog(
-      context: context,
-      builder: (_) {
-        return AlertDialog(
-          title: Text('${s.rollNumber} - ${s.fullName}'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _row('Final', s.finalExam),
-                Text('Comment: ${s.finalComment}'),
-
-                const SizedBox(height: 8),
-
-                _row('Final Resit', s.finalResit),
-                _row('Practical', s.practical),
-
-                const SizedBox(height: 8),
-
-                _row('Progress Test 1', s.pt1),
-                Text('Progress Test 1 Comment: ${s.pt1Comment}'),
-
-                _row('Progress Test 2', s.pt2),
-                Text('Progress Test 2 Comment: ${s.pt2Comment}'),
-
-                _row('Progress Test 3', s.pt3),
-                Text('Progress Test 3 Comment: ${s.pt3Comment}'),
-
-                const SizedBox(height: 8),
-
-                _row('Project', s.project),
-                Text('Project Comment: ${s.projectComment}'),
-
-                const Divider(),
-
-                _row('Total', s.total),
-                Text('Result: ${s.result}'),
-                Text('Comment: ${s.comment}'),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _row(String label, double value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Text(
-        '$label: ${_num(value)}',
-        style: const TextStyle(fontWeight: FontWeight.w500),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final columns = <DataColumn>[
-      DataColumn(label: SizedBox(width: 110, child: Text('Roll No.'))),
+      DataColumn(label: SizedBox(width: 110, child: Text('Roll Number'))),
       DataColumn(label: SizedBox(width: 170, child: Text('Full Name'))),
 
-      DataColumn(label: SizedBox(width: 100, child: Text('Final'))),
-      DataColumn(label: SizedBox(width: 110, child: Text('Final Resit'))),
-      DataColumn(label: SizedBox(width: 110, child: Text('Practical'))),
-      DataColumn(label: SizedBox(width: 110, child: Text('Practical Resit'))),
+      DataColumn(label: SizedBox(width: 100, child: Text('Final Exam'))),
+      DataColumn(label: SizedBox(width: 110, child: Text('Final Exam Resit'))),
+      DataColumn(label: SizedBox(width: 110, child: Text('Practical Exam'))),
+      DataColumn(label: SizedBox(width: 110, child: Text('Practical Exam Resit'))),
       DataColumn(label: SizedBox(width: 120, child: Text('Progress Test 1'))),
 
       DataColumn(label: SizedBox(width: 120, child: Text('Progress Test 2'))),
